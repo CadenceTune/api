@@ -85,3 +85,90 @@ src/main/java/com/cadencetune/api/
         └── dto/                # Request / Response DTO
             ├── request/
             └── response/
+```
+
+---
+
+## 5. API Response & Error Handling
+
+### 공통 응답 포맷 (Success Response)
+
+모든 정상 API 응답은 아래 전역 Wrapper 객체 형태로 감싸서 일관되게 반환합니다.
+
+```json
+{
+  "status": "SUCCESS",
+  "data": {
+    "userId": 1,
+    "email": "user@example.com"
+  },
+  "message": null
+}
+```
+
+### 예외 처리 포맷 (Error Response)
+
+비즈니스 로직 처리 중 예외 발생 시 CustomException을 던지며, GlobalExceptionHandler에서 아래와 같이 표준 에러 응답을 생성합니다.
+
+```json
+{
+  "status": "ERROR",
+  "code": "USER_NOT_FOUND",
+  "message": "존재하지 않는 사용자입니다."
+}
+```
+
+---
+
+## 6. 환경 설정 및 실행 (Environment Configuration)
+
+### 1) 로컬 Database (PostgreSQL) 실행
+
+프로젝트 루트에 포함된 `docker-compose.yaml`을 이용해 로컬 DB 컨테이너를 구동합니다.
+
+docker compose up -d
+
+* **Port**: `5432`
+* **Database**: `cadencetune`
+* **Username**: `cadence_user`
+
+### 2) Application 설정 (`application-local.yaml`)
+
+`src/main/resources/application-local.yaml` 파일 또는 환경 변수를 아래와 같이 세팅합니다.
+
+* **Database Connection**
+    * `DB_URL`: `jdbc:postgresql://localhost:5432/cadencetune`
+    * `DB_USERNAME`: `cadence_user`
+    * `DB_PASSWORD`: `your_password`
+
+* **External Services**
+    * `PROCESSOR_BASE_URL`: `http://localhost:8000` (CadenceTune Processor 연동 주소)
+
+---
+
+## 7. 외부 모듈 연동 (External Integration)
+
+* **CadenceTune Processor (Python/FastAPI)**
+    * Spring Boot API 서버는 비동기/동기 HTTP 요청(WebClient 또는 OpenFeign)을 통해 Processor 모듈과 통신합니다.
+    * 처리 요청 중 외부 모듈 에러 발생 시 `PROCESSOR_ERROR` 커스텀 에러 코드로 예외를 추적합니다.
+
+---
+
+## 8. API 명세서 (API Documentation)
+
+프로젝트 실행 후 아래 주소로 접속하여 Swagger UI 기반의 실시간 API 명세를 확인 및 테스트할 수 있습니다.
+
+* **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
+* **OpenAPI Spec**: `http://localhost:8080/v3/api-docs`
+
+---
+
+## 9. 빌드 및 테스트 (Build & Test)
+
+### 전체 테스트 실행
+
+./gradlew test
+
+### 배포용 JAR 파일 빌드
+
+./gradlew clean bootJar
