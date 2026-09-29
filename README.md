@@ -172,3 +172,12 @@ docker compose up -d
 ### 배포용 JAR 파일 빌드
 
 ./gradlew clean bootJar
+
+---
+
+## 10. CI/CD 파이프라인 (CI/CD Pipeline)
+
+* **CI (GitHub Actions)**
+    * `main`, `develop` 브랜치 대상 PR 생성 및 Push 발생 시 자동 빌드 및 `./gradlew test` 검증 수행
+* **CD (지속적 배포)**
+    * 배포 환경 구성 완료 후 적용 예정 (Docker Container 기반 배포 파이프라인 구축 계획)
