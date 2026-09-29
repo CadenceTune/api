@@ -1,9 +1,9 @@
 ---
 name: Feature Request
-about: 새로운 기능 개발 또는 개선 항목을 등록합니다.
+about: 새로운 기능 구현 및 추가 작업
 title: '[feat] '
-labels: ''
-assignees: ''
+labels: 'feat'
+assignees: 'mojunsul'
 ---
 
 ## 📌 기능 개요

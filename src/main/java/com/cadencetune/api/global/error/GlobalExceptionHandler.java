@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(CustomException.class)
-  public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
+  @ExceptionHandler(BusinessException.class)
+  public ResponseEntity<ApiResponse<Void>> handleCustomException(BusinessException e) {
     ErrorCode errorCode = e.getErrorCode();
     log.warn(
         "[CustomException] code: {}, message: {}", errorCode.getCode(), errorCode.getMessage());
