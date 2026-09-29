@@ -21,7 +21,7 @@ public class Playlist {
   private String url;
 
   @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Track> tracks = new ArrayList<>();
+  private final List<Track> tracks = new ArrayList<>();
 
   private Playlist(String url) {
     this.url = url;
