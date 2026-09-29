@@ -10,10 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # CI 가상환경 내에 PostgreSQL 컨테이너 구동
     services:
       postgres:
-        image: postgres:18-alpine
+        image: postgres:16-alpine
         env:
           POSTGRES_DB: cadencetune
           POSTGRES_USER: cadence_user
@@ -50,4 +49,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --info
