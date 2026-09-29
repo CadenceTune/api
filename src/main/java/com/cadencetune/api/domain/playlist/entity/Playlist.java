@@ -1,16 +1,16 @@
-package com.cadencetune.api.playlist.domain;
+package com.cadencetune.api.domain.playlist.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
-@NoArgsConstructor
 @Table(name = "playlists")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Playlist {
 
     @Id
@@ -28,7 +28,7 @@ public class Playlist {
     }
 
     public void addTrack(Track track) {
-        tracks.add(track);
+        this.tracks.add(track);
         track.setPlaylist(this);
     }
 }
