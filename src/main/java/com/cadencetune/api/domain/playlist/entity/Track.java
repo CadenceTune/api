@@ -1,14 +1,14 @@
-package com.cadencetune.api.playlist.domain;
+package com.cadencetune.api.domain.playlist.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@NoArgsConstructor
 @Table(name = "tracks")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Track {
 
   @Id
@@ -31,9 +31,8 @@ public class Track {
   @Column(length = 500)
   private String thumbnailUrl;
 
-  @Setter private double bpm;
+  private double bpm;
 
-  @Setter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "playlist_id")
   private Playlist playlist;
@@ -48,10 +47,18 @@ public class Track {
       double bpm) {
     this.youtubeId = youtubeId;
     this.title = title;
-    this.artist = artist != null ? artist.replace("- Topic", "").trim() : "";
+    this.artist = artist;
     this.duration = duration;
     this.url = url;
     this.thumbnailUrl = thumbnailUrl;
+    this.bpm = bpm;
+  }
+
+  public void setPlaylist(Playlist playlist) {
+    this.playlist = playlist;
+  }
+
+  public void setBpm(double bpm) {
     this.bpm = bpm;
   }
 }
