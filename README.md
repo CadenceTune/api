@@ -12,34 +12,35 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
 
 ## 2. 기술 스택 (Tech Stack)
 
-| 구분 | 기술 스택 |
-|---|---|
-| **Language** | Java 17 |
-| **Framework** | Spring Boot 4.1.1, Spring Data JPA, Spring Security |
-| **Build Tool** | Gradle |
-| **Database** | PostgreSQL |
+| 구분             | 기술 스택                                               |
+|----------------|-----------------------------------------------------|
+| **Language**   | Java 17                                             |
+| **Framework**  | Spring Boot 4.1.1, Spring Data JPA, Spring Security |
+| **Build Tool** | Gradle                                              |
+| **Database**   | PostgreSQL                                          |
 
 ---
+
 ## 3. 개발 및 커밋 규칙 (Development Rules)
 
 ### Commit Convention
 
 커밋 메시지는 `[type] 설명 (#이슈번호)` 형식으로 작성합니다.
 
-| Type | 설명 | 작성 예시 |
-|---|---|---|
-| **[feat]** | 새로운 기능 개발 및 추가 | `[feat] 사용자 로그인 API 구현 (#12)` |
-| **[fix]** | 버그 수정 | `[fix] 토큰 만료 에러 처리 수정 (#24)` |
-| **[docs]** | 문서 작성 및 수정 (README 등) | `[docs] README 개발 규칙 업데이트 (#3)` |
-| **[style]** | 코드 포맷팅, 세미콜론 수정 (비즈니스 로직 변경 없음) | `[style] Google Java Format 적용 (#5)` |
-| **[refactor]** | 코드 리팩토링 (기능 변경 없이 구조 개선) | `[refactor] Service 로직 분리 (#18)` |
-| **[test]** | 테스트 코드 작성 및 수정 | `[test] 회원가입 단위 테스트 추가 (#7)` |
-| **[chore]** | 빌드 설정, 의존성 패키지 관리 등 단순 작업 | `[chore] Spring Security 의존성 추가 (#1)` |
+| Type           | 설명                              | 작성 예시                                 |
+|----------------|---------------------------------|---------------------------------------|
+| **[feat]**     | 새로운 기능 개발 및 추가                  | `[feat] 사용자 로그인 API 구현 (#12)`         |
+| **[fix]**      | 버그 수정                           | `[fix] 토큰 만료 에러 처리 수정 (#24)`          |
+| **[docs]**     | 문서 작성 및 수정 (README 등)           | `[docs] README 개발 규칙 업데이트 (#3)`       |
+| **[style]**    | 코드 포맷팅, 세미콜론 수정 (비즈니스 로직 변경 없음) | `[style] Google Java Format 적용 (#5)`  |
+| **[refactor]** | 코드 리팩토링 (기능 변경 없이 구조 개선)        | `[refactor] Service 로직 분리 (#18)`      |
+| **[test]**     | 테스트 코드 작성 및 수정                  | `[test] 회원가입 단위 테스트 추가 (#7)`          |
+| **[chore]**    | 빌드 설정, 의존성 패키지 관리 등 단순 작업       | `[chore] Spring Security 의존성 추가 (#1)` |
 
 * **제목 작성 규칙**
-  * 50자 이내로 작성하며 끝에 마침표(`.`)를 사용하지 않음
-  * 명사형 어미(`~ 구현`, `~ 추가`, `~ 수정`, `~ 적용`)로 작성
-  * 이슈 트래커 연동을 위해 제목 끝에 `(#이슈번호)` 명시
+    * 50자 이내로 작성하며 끝에 마침표(`.`)를 사용하지 않음
+    * 명사형 어미(`~ 구현`, `~ 추가`, `~ 수정`, `~ 적용`)로 작성
+    * 이슈 트래커 연동을 위해 제목 끝에 `(#이슈번호)` 명시
 
 ---
 
@@ -56,11 +57,11 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
 
 * **IDE Formatting**: Google Java Format 세팅 후 자동 포맷팅 적용
 * **Lombok 사용 가이드**
-  * `@Getter`, `@RequiredArgsConstructor` 위주로 사용
-  * `@Data` 및 `@Setter` 사용 지양 (불변성 유지)
+    * `@Getter`, `@RequiredArgsConstructor` 위주로 사용
+    * `@Data` 및 `@Setter` 사용 지양 (불변성 유지)
 * **Entity 작성 규칙**
-  * 객체 생성 안정성을 위해 `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 필수 적용
-  * `@Builder` 패턴을 사용하여 객체 생성
+    * 객체 생성 안정성을 위해 `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 필수 적용
+    * `@Builder` 패턴을 사용하여 객체 생성
 
 ---
 
