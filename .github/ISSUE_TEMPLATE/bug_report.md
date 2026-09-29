@@ -1,9 +1,9 @@
 ---
 name: Bug Report
-about: 서비스 중 발생한 버그 및 장애를 제보합니다.
+about: 문제 발생 및 버그 수정 작업
 title: '[fix] '
-labels: 'bug'
-assignees: ''
+labels: 'fix'
+assignees: 'mojunsul'
 ---
 
 ## 🐛 버그 개요

@@ -32,6 +32,12 @@ public class PlaylistService {
     this.trackRepository = trackRepository;
   }
 
+  public Playlist findById(Long id) {
+    return playlistRepository
+        .findById(id)
+        .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
+  }
+
   @Transactional
   public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
     String playlistUrl = cleanPlaylistUrl(rawPlaylistUrl);
@@ -50,7 +56,7 @@ public class PlaylistService {
 
     log.info("[PlaylistService] 수집된 트랙 개수: {}", rawTracks != null ? rawTracks.size() : 0);
 
-    Playlist playlist = new Playlist(playlistUrl);
+    Playlist playlist = Playlist.from(playlistUrl);
     Playlist savedPlaylist = playlistRepository.save(playlist);
 
     if (rawTracks != null && !rawTracks.isEmpty()) {
@@ -83,7 +89,16 @@ public class PlaylistService {
               title,
               track.getBpm());
         } else {
-          track = new Track(youtubeId, title, artist, duration, url, thumbnailUrl, 0.0);
+          track =
+              Track.builder()
+                  .youtubeId(youtubeId)
+                  .title(title)
+                  .artist(artist)
+                  .duration(duration)
+                  .url(url)
+                  .thumbnailUrl(thumbnailUrl)
+                  .bpm(0.0)
+                  .build();
           log.info("[Track 신규] 새로운 트랙 추가 - {} - {}", artist, title);
         }
 

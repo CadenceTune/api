@@ -10,3 +10,6 @@ services:
       POSTGRES_PASSWORD: your_password
     ports:
       - "5432:5432"
+    volumes:
+      # 로컬 디렉토리에 데이터를 영구 저장
+      - ./postgres_data:/var/lib/postgresql/data
