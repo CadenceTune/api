@@ -2,6 +2,7 @@ package com.cadencetune.api.domain.playlist.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,6 +38,7 @@ public class Track {
   @JoinColumn(name = "playlist_id")
   private Playlist playlist;
 
+  @Builder
   public Track(
       String youtubeId,
       String title,
