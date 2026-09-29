@@ -42,16 +42,12 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
     * 명사형 어미(`~ 구현`, `~ 추가`, `~ 수정`, `~ 적용`)로 작성
     * 이슈 트래커 연동을 위해 제목 끝에 `(#이슈번호)` 명시
 
----
-
 ### Branch Strategy (Git Flow)
 
 * **`main`**: Production 환경 배포용 브랜치
 * **`develop`**: 다음 버전을 위한 중심 개발 브랜치
 * **`feat/{issue-number}-{feature-name}`**: 기능 개발 브랜치 (예: `feat/12-user-login`)
 * **`fix/{issue-number}-{bug-name}`**: 버그 수정 브랜치 (예: `fix/24-token-error`)
-
----
 
 ### Code Style & Formatting
 
@@ -62,6 +58,13 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
 * **Entity 작성 규칙**
     * 객체 생성 안정성을 위해 `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 필수 적용
     * `@Builder` 패턴을 사용하여 객체 생성
+
+### Issue Convention
+
+이슈 등록 시 Issue Template(Feature Request / Bug Report)을 활용하며, 이슈 제목은 커밋 타입과 동일한 태그를 사용합니다.
+
+* **Issue Title**: `[type] 이슈 내용` (예: `[feat] 사용자 로그인 API 구현`)
+* **Type 종류**: `[feat]`, `[fix]`, `[docs]`, `[style]`, `[refactor]`, `[test]`, `[chore]`
 
 ---
 
