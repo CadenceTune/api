@@ -12,6 +12,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-# 미정의 환경변수로 인한 PlaceholderResolutionException 방지
+# 소스 코드의 @Value("${processor.url}") 키에 맞춰 명시
 processor:
-  base-url: http://localhost:8000
+  url: http://localhost:8000
