@@ -13,22 +13,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Playlist {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, length = 500)
-    private String url;
+  @Column(nullable = false, length = 500)
+  private String url;
 
-    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Track> tracks = new ArrayList<>();
+  @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Track> tracks = new ArrayList<>();
 
-    public Playlist(String url) {
-        this.url = url;
-    }
+  private Playlist(String url) {
+    this.url = url;
+  }
 
-    public void addTrack(Track track) {
-        this.tracks.add(track);
-        track.setPlaylist(this);
-    }
+  public static Playlist from(String url) {
+    return new Playlist(url);
+  }
+
+  public void addTrack(Track track) {
+    this.tracks.add(track);
+    track.setPlaylist(this);
+  }
 }
