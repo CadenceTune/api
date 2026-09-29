@@ -1,18 +1,19 @@
-package com.cadencetune.api.playlist.service;
+package com.cadencetune.api.domain.playlist.service;
 
-import com.cadencetune.api.playlist.client.ProcessorClient;
-import com.cadencetune.api.playlist.domain.Playlist;
-import com.cadencetune.api.playlist.domain.Track;
-import com.cadencetune.api.playlist.dto.PlaylistResponseDto;
-import com.cadencetune.api.playlist.repository.PlaylistRepository;
-import com.cadencetune.api.playlist.repository.TrackRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.cadencetune.api.domain.playlist.client.ProcessorClient;
+import com.cadencetune.api.domain.playlist.dto.response.PlaylistResponseDto;
+import com.cadencetune.api.domain.playlist.entity.Playlist;
+import com.cadencetune.api.domain.playlist.entity.Track;
+import com.cadencetune.api.domain.playlist.repository.PlaylistRepository;
+import com.cadencetune.api.domain.playlist.repository.TrackRepository;
+import com.cadencetune.api.global.error.CustomException;
+import com.cadencetune.api.global.error.ErrorCode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -30,10 +31,8 @@ public class PlaylistService {
 
     @Transactional
     public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
-        // 1. Clean URL 정규화 (전후 공백 및 si 등 불필요 파라미터 제거)
         String playlistUrl = cleanPlaylistUrl(rawPlaylistUrl);
 
-        // 2. 플레이리스트 중복 체크
         Optional<Playlist> existingPlaylistOpt = playlistRepository.findByUrl(playlistUrl);
         if (existingPlaylistOpt.isPresent()) {
             Playlist existingPlaylist = existingPlaylistOpt.get();
@@ -41,7 +40,6 @@ public class PlaylistService {
             return new PlaylistResponseDto(existingPlaylist);
         }
 
-        // 3. 신규 플레이리스트인 경우 파이썬 프로세서 호출
         List<Map<String, Object>> rawTracks = processorClient.fetchPlaylistFromProcessor(playlistUrl);
 
         log.info("[PlaylistService] 수집된 트랙 개수: {}", rawTracks != null ? rawTracks.size() : 0);
@@ -60,7 +58,6 @@ public class PlaylistService {
                 String thumbnailUrl = rawTrack.get("thumbnail_url") != null ? (String) rawTrack.get("thumbnail_url") :
                         (rawTrack.get("thumbnailUrl") != null ? (String) rawTrack.get("thumbnailUrl") : "");
 
-                // DB 트랙 중복 체크 (youtubeId 기준)
                 Optional<Track> existingTrackOpt = trackRepository.findByYoutubeId(youtubeId);
 
                 Track track;
@@ -87,7 +84,7 @@ public class PlaylistService {
     @Transactional
     public void analyzePlaylistBpm(Long playlistId) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new IllegalArgumentException("플레이리스트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PLAYLIST_NOT_FOUND));
 
         for (Track track : playlist.getTracks()) {
             if (isTrackBpmEmpty(track)) {
