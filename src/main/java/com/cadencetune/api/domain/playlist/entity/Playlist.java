@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,12 +24,13 @@ public class Playlist {
   @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Track> tracks = new ArrayList<>();
 
+  @Builder
   private Playlist(String url) {
     this.url = url;
   }
 
   public static Playlist from(String url) {
-    return new Playlist(url);
+    return Playlist.builder().url(url).build();
   }
 
   public void addTrack(Track track) {
