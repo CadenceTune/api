@@ -56,8 +56,9 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
     * `@Data` 및 `@Setter` 사용 지양 (불변성 유지)
 * **Entity 작성 규칙**
     * 객체 생성 안정성을 위해 `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 필수 적용
-    * `@Builder` 패턴을 사용하여 객체 생성
-    * 필요시 정적 팩토리 메서드로 객체 생성
+    * 클래스 레벨 `@Builder` 및 `@Setter` 전역 선언 금지
+    * 초기 생성 시 필요한 필수/주요 필드를 파라미터로 갖는 생성자를 정의하고, 해당 **생성자 레벨에 `@Builder` 적용**
+    * 엔티티 상태 변경 및 연관관계 연결은 의미 있는 도메인 메서드(e.g., `updateData()`, `assignPlaylist()`)를 통해 수행
 
 ### Issue Convention
 

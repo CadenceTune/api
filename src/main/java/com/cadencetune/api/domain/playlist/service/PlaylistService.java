@@ -102,7 +102,7 @@ public class PlaylistService {
           log.info("[Track 신규] 새로운 트랙 추가 - {} - {}", artist, title);
         }
 
-        track.setPlaylist(savedPlaylist);
+        track.assignPlaylist(savedPlaylist);
         savedPlaylist.addTrack(track);
       }
 
@@ -129,7 +129,7 @@ public class PlaylistService {
               processorClient.fetchBpmFromProcessor(
                   track.getTitle(), track.getArtist(), track.getUrl());
           if (bpm > 0.0) {
-            track.setBpm(bpm);
+            track.updateBpm(bpm);
             trackRepository.save(track);
             log.info("[BPM 저장 성공] 트랙 ID {} -> {} BPM", track.getId(), bpm);
           } else {
@@ -157,7 +157,7 @@ public class PlaylistService {
               processorClient.fetchBpmFromProcessor(
                   track.getTitle(), track.getArtist(), track.getUrl());
           if (bpm > 0.0) {
-            track.setBpm(bpm);
+            track.updateBpm(bpm);
             trackRepository.save(track);
             log.info("[BPM 저장 성공] 트랙 ID {} -> {} BPM", track.getId(), bpm);
           } else {
