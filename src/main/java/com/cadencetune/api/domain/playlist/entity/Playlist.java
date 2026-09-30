@@ -1,17 +1,18 @@
 package com.cadencetune.api.domain.playlist.entity;
 
+import com.cadencetune.api.global.common.BaseEntity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @Table(name = "playlists")
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Playlist {
+@Builder
+public class Playlist extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,12 +24,8 @@ public class Playlist {
   @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Track> tracks = new ArrayList<>();
 
-  private Playlist(String url) {
-    this.url = url;
-  }
-
   public static Playlist from(String url) {
-    return new Playlist(url);
+    return Playlist.builder().url(url).build();
   }
 
   public void addTrack(Track track) {

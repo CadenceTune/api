@@ -58,6 +58,7 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
 * **Entity 작성 규칙**
     * 객체 생성 안정성을 위해 `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 필수 적용
     * `@Builder` 패턴을 사용하여 객체 생성
+    * 필요시 정적 팩토리 메서드로 객체 생성
 
 ### Issue Convention
 
