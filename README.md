@@ -44,8 +44,7 @@ CadenceTune API는 사용자 인증, 데이터 관리, 외부 서비스(Processo
 
 ### Branch Strategy (Git Flow)
 
-* **`main`**: Production 환경 배포용 브랜치
-* **`develop`**: 다음 버전을 위한 중심 개발 브랜치
+* **`main`**: 중심 개발 브랜치
 * **`feat/{issue-number}-{feature-name}`**: 기능 개발 브랜치 (예: `feat/12-user-login`)
 * **`fix/{issue-number}-{bug-name}`**: 버그 수정 브랜치 (예: `fix/24-token-error`)
 
