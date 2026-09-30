@@ -37,7 +37,8 @@ class PlaylistControllerTest {
 
   @Test
   @DisplayName("플레이리스트 등록 성공 시 ApiResponse SUCCESS 규격으로 응답한다")
-  void registerPlaylistSuccess() throws Exception {
+  void registerPlaylist_Success() throws Exception {
+    // given
     PlaylistResponseDto responseDto =
         new PlaylistResponseDto(
             1L, "https://www.youtube.com/playlist?list=sample", Collections.emptyList());
@@ -46,6 +47,7 @@ class PlaylistControllerTest {
     PlaylistRegisterRequest request =
         new PlaylistRegisterRequest("https://www.youtube.com/playlist?list=sample");
 
+    // when & then
     mockMvc
         .perform(
             post("/api/playlists")
@@ -60,11 +62,13 @@ class PlaylistControllerTest {
 
   @Test
   @DisplayName("존재하지 않는 플레이리스트 BPM 분석 요청 시 PLAYLIST_NOT_FOUND 에러를 응답한다")
-  void analyzePlaylistNotFound() throws Exception {
+  void analyzePlaylist_NotFound() throws Exception {
+    // given
     willThrow(new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND))
         .given(playlistService)
         .analyzePlaylistBpm(anyLong());
 
+    // when & then
     mockMvc
         .perform(post("/api/playlists/999/analyze"))
         .andExpect(status().isNotFound())

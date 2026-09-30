@@ -40,6 +40,7 @@ class ProcessorClientTest {
     @Test
     @DisplayName("외부 프로세서에서 플레이리스트 트랙 목록을 성공적으로 가져온다")
     void fetchPlaylist_Success() throws Exception {
+      // given
       Map<String, Object> responseBody = new HashMap<>();
       responseBody.put("status", "success");
       responseBody.put("tracks", List.of(Map.of("title", "Test Track", "url", "http://test")));
@@ -51,9 +52,11 @@ class ProcessorClientTest {
               withSuccess(
                   objectMapper.writeValueAsString(responseBody), MediaType.APPLICATION_JSON));
 
+      // when
       List<Map<String, Object>> tracks =
           processorClient.fetchPlaylistFromProcessor("http://youtube.com/playlist");
 
+      // then
       assertThat(tracks).hasSize(1);
       assertThat(tracks.get(0).get("title")).isEqualTo("Test Track");
       mockServer.verify();
@@ -62,14 +65,17 @@ class ProcessorClientTest {
     @Test
     @DisplayName("외부 프로세서 통신 에러 발생 시 빈 리스트를 반환한다")
     void fetchPlaylist_ServerException_ReturnsEmptyList() {
+      // given
       mockServer
           .expect(requestTo("http://localhost:8000/api/processor/playlist"))
           .andExpect(method(HttpMethod.POST))
           .andRespond(withServerError());
 
+      // when
       List<Map<String, Object>> tracks =
           processorClient.fetchPlaylistFromProcessor("http://youtube.com/playlist");
 
+      // then
       assertThat(tracks).isEmpty();
       mockServer.verify();
     }
@@ -82,6 +88,7 @@ class ProcessorClientTest {
     @Test
     @DisplayName("외부 프로세서에서 곡의 BPM을 성공적으로 가져온다")
     void fetchBpm_Success() throws Exception {
+      // given
       Map<String, Object> responseBody = new HashMap<>();
       responseBody.put("status", "success");
       responseBody.put("bpm", 128.5);
@@ -93,8 +100,10 @@ class ProcessorClientTest {
               withSuccess(
                   objectMapper.writeValueAsString(responseBody), MediaType.APPLICATION_JSON));
 
+      // when
       double bpm = processorClient.fetchBpmFromProcessor("Title", "Artist", "http://youtube.com");
 
+      // then
       assertThat(bpm).isEqualTo(128.5);
       mockServer.verify();
     }

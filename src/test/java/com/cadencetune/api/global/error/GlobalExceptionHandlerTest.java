@@ -25,17 +25,22 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("BusinessException 발생 시 올바른 ErrorCode와 Status를 반환한다")
-    void handleBusinessException() {
+    void handleBusinessException_Success() {
+      // given
       BusinessException exception = new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND);
 
+      // when
       ResponseEntity<ApiResponse<Void>> response =
           globalExceptionHandler.handleBusinessException(exception);
 
+      // then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-      assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getStatus()).isEqualTo("ERROR");
-      assertThat(response.getBody().getCode()).isEqualTo("PLAYLIST_NOT_FOUND");
-      assertThat(response.getBody().getMessage()).isEqualTo("존재하지 않는 플레이리스트입니다.");
+
+      ApiResponse<Void> body = response.getBody();
+      assertThat(body).isNotNull();
+      assertThat(body.getStatus()).isEqualTo("ERROR");
+      assertThat(body.getCode()).isEqualTo("PLAYLIST_NOT_FOUND");
+      assertThat(body.getMessage()).isEqualTo("존재하지 않는 플레이리스트입니다.");
     }
   }
 }

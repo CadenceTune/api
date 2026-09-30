@@ -4,20 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.cadencetune.api.domain.playlist.entity.Playlist;
 import com.cadencetune.api.domain.playlist.entity.Track;
-import com.cadencetune.api.global.config.JpaConfig;
+import com.cadencetune.api.support.annotation.RepositoryTest;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
-import org.springframework.context.annotation.Import;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@RepositoryTest
 class PlaylistRepositoryTest {
 
   @Autowired private PlaylistRepository playlistRepository;
