@@ -1,10 +1,7 @@
 package com.cadencetune.api.domain.playlist.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -32,8 +29,9 @@ public class Track {
   @Column(length = 500)
   private String thumbnailUrl;
 
-  private double bpm;
+  @Setter private double bpm;
 
+  @Setter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "playlist_id")
   private Playlist playlist;
@@ -53,14 +51,6 @@ public class Track {
     this.duration = duration;
     this.url = url;
     this.thumbnailUrl = thumbnailUrl;
-    this.bpm = bpm;
-  }
-
-  public void setPlaylist(Playlist playlist) {
-    this.playlist = playlist;
-  }
-
-  public void setBpm(double bpm) {
     this.bpm = bpm;
   }
 }
