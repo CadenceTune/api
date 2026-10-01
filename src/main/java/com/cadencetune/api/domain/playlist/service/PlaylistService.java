@@ -41,10 +41,7 @@ public class PlaylistService {
   /**
    * URL을 정규화하여 중복 등록을 방지하고, 신규 플레이리스트에 프로세서가 수집한 트랙을 연결한다.
    *
-   * <p>프로세서의 snake_case 및 camelCase 필드를 지원하며 누락된 메타데이터는 기본값으로 대체한다. 수집된 트랙이 없어도 플레이리스트는 저장한다.
-   *
-   * @param rawPlaylistUrl 사용자가 전달한 플레이리스트 URL
-   * @return 동일한 정규화 URL로 등록된 플레이리스트 또는 새로 저장한 플레이리스트
+   * <p>프로세서의 snake_case 및 camelCase 필드를 유연하게 지원하며, 누락된 메타데이터는 기본값으로 대체한다.
    */
   @Transactional
   public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
@@ -69,7 +66,6 @@ public class PlaylistService {
 
     if (rawTracks != null && !rawTracks.isEmpty()) {
       for (Map<String, Object> rawTrack : rawTracks) {
-        // 파이썬 프로세서 응답 포맷(snake_case / camelCase) 유연한 대응 및 기본값 보장
         String youtubeId =
             rawTrack.get("youtube_id") != null
                 ? (String) rawTrack.get("youtube_id")
@@ -123,12 +119,9 @@ public class PlaylistService {
   }
 
   /**
-   * 외부 분석 비용을 줄이고 기존 BPM을 보존하기 위해 플레이리스트 내 BPM이 0.0인 트랙만 분석한다.
+   * 외부 분석 비용을 줄이고 기존 BPM을 보존하기 위해 플레이리스트 내 미측정(0.0) 트랙만 분석한다.
    *
-   * <p>양수 결과만 저장하며, 트랙별 분석 또는 저장 중 예외는 기록하고 다음 트랙 처리를 계속한다.
-   *
-   * @param playlistId 분석할 플레이리스트 ID
-   * @throws BusinessException 플레이리스트가 존재하지 않는 경우
+   * <p>트랙별 분석 실패 시 에러 로그를 남기고 다음 트랙 처리 흐름을 계속 유지한다.
    */
   @Transactional
   public void analyzePlaylistBpm(Long playlistId) {
@@ -138,7 +131,6 @@ public class PlaylistService {
             .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
 
     for (Track track : playlist.getTracks()) {
-      // 외부 통신 비용 절감 및 기존 BPM 보존을 위해 미측정(0.0) 트랙만 리소스를 소모하여 계산
       if (isTrackBpmEmpty(track)) {
         try {
           log.info(
@@ -194,12 +186,7 @@ public class PlaylistService {
     return track.getBpm() == 0.0;
   }
 
-  /**
-   * 동일한 목록이 서로 다른 공유 URL로 중복 등록되지 않도록 list 파라미터를 표준 YouTube 플레이리스트 URL로 변환한다.
-   *
-   * @param rawUrl 사용자가 전달한 URL
-   * @return null 또는 공백 입력이면 빈 문자열, list 파라미터가 있으면 표준 URL, 그 외에는 앞뒤 공백을 제거한 입력
-   */
+  /** 다양한 형태의 YouTube 공유 URL에서 pure list ID를 추출하여 중복 등록 방지 및 표준화한다. */
   private String cleanPlaylistUrl(String rawUrl) {
     if (rawUrl == null || rawUrl.isBlank()) {
       return "";
