@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
 @Getter
+// 클라이언트(프론트엔드)에서 일관된 JSON 스키마 구조로 파싱할 수 있도록 null 필드도 명시적으로 응답에 포함
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public class ApiResponse<T> {
 
