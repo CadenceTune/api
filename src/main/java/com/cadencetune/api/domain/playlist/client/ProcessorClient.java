@@ -18,6 +18,12 @@ public class ProcessorClient {
 
   private final RestClient processorRestClient;
 
+  /**
+   * 외부 프로세서에서 트랙 목록을 가져오며, 연동 실패가 서비스 예외로 전파되지 않도록 빈 목록으로 대체한다.
+   *
+   * @param playlistUrl 수집할 플레이리스트 URL
+   * @return 수집된 트랙 목록. 응답이 없거나 성공 상태가 아닌 경우, 트랙 목록이 없거나 통신 및 응답 처리에 실패한 경우 빈 목록
+   */
   @SuppressWarnings("unchecked")
   public List<Map<String, Object>> fetchPlaylistFromProcessor(String playlistUrl) {
     Map<String, String> requestBody = new HashMap<>();
@@ -45,6 +51,14 @@ public class ProcessorClient {
     return Collections.emptyList();
   }
 
+  /**
+   * 외부 프로세서에 BPM 분석을 요청하며, 분석 결과를 얻지 못하면 미측정 상태를 나타내는 0.0을 반환한다.
+   *
+   * @param title 트랙 제목
+   * @param artist 아티스트 이름
+   * @param youtubeUrl 분석할 트랙의 YouTube URL
+   * @return 성공 응답에 포함된 숫자 BPM. 응답이 없거나 성공 상태가 아닌 경우, 숫자 BPM이 없거나 통신 및 응답 처리에 실패한 경우 0.0
+   */
   public double fetchBpmFromProcessor(String title, String artist, String youtubeUrl) {
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("title", title);

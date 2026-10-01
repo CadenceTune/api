@@ -38,6 +38,14 @@ public class PlaylistService {
         .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
   }
 
+  /**
+   * URL을 정규화하여 중복 등록을 방지하고, 신규 플레이리스트에 프로세서가 수집한 트랙을 연결한다.
+   *
+   * <p>프로세서의 snake_case 및 camelCase 필드를 지원하며 누락된 메타데이터는 기본값으로 대체한다. 수집된 트랙이 없어도 플레이리스트는 저장한다.
+   *
+   * @param rawPlaylistUrl 사용자가 전달한 플레이리스트 URL
+   * @return 동일한 정규화 URL로 등록된 플레이리스트 또는 새로 저장한 플레이리스트
+   */
   @Transactional
   public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
     String playlistUrl = cleanPlaylistUrl(rawPlaylistUrl);
@@ -114,6 +122,14 @@ public class PlaylistService {
     return new PlaylistResponseDto(savedPlaylist);
   }
 
+  /**
+   * 외부 분석 비용을 줄이고 기존 BPM을 보존하기 위해 플레이리스트 내 BPM이 0.0인 트랙만 분석한다.
+   *
+   * <p>양수 결과만 저장하며, 트랙별 분석 또는 저장 중 예외는 기록하고 다음 트랙 처리를 계속한다.
+   *
+   * @param playlistId 분석할 플레이리스트 ID
+   * @throws BusinessException 플레이리스트가 존재하지 않는 경우
+   */
   @Transactional
   public void analyzePlaylistBpm(Long playlistId) {
     Playlist playlist =
@@ -178,7 +194,12 @@ public class PlaylistService {
     return track.getBpm() == 0.0;
   }
 
-  // 사용자가 공유한 다양한 형태의 YouTube URL에서 pure list ID를 추출하여 중복 등록 방지 및 표준화
+  /**
+   * 동일한 목록이 서로 다른 공유 URL로 중복 등록되지 않도록 list 파라미터를 표준 YouTube 플레이리스트 URL로 변환한다.
+   *
+   * @param rawUrl 사용자가 전달한 URL
+   * @return null 또는 공백 입력이면 빈 문자열, list 파라미터가 있으면 표준 URL, 그 외에는 앞뒤 공백을 제거한 입력
+   */
   private String cleanPlaylistUrl(String rawUrl) {
     if (rawUrl == null || rawUrl.isBlank()) {
       return "";

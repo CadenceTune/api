@@ -4,8 +4,12 @@ import com.cadencetune.api.global.error.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
+/**
+ * 클라이언트가 일관된 JSON 구조로 파싱할 수 있도록 null 필드도 명시적으로 포함하는 공통 API 응답이다.
+ *
+ * @param <T> 성공 응답 데이터 타입
+ */
 @Getter
-// 클라이언트(프론트엔드)에서 일관된 JSON 스키마 구조로 파싱할 수 있도록 null 필드도 명시적으로 응답에 포함
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public class ApiResponse<T> {
 
