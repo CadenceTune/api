@@ -61,6 +61,7 @@ public class PlaylistService {
 
     if (rawTracks != null && !rawTracks.isEmpty()) {
       for (Map<String, Object> rawTrack : rawTracks) {
+        // 파이썬 프로세서 응답 포맷(snake_case / camelCase) 유연한 대응 및 기본값 보장
         String youtubeId =
             rawTrack.get("youtube_id") != null
                 ? (String) rawTrack.get("youtube_id")
@@ -121,6 +122,7 @@ public class PlaylistService {
             .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
 
     for (Track track : playlist.getTracks()) {
+      // 외부 통신 비용 절감 및 기존 BPM 보존을 위해 미측정(0.0) 트랙만 리소스를 소모하여 계산
       if (isTrackBpmEmpty(track)) {
         try {
           log.info(
@@ -176,6 +178,7 @@ public class PlaylistService {
     return track.getBpm() == 0.0;
   }
 
+  // 사용자가 공유한 다양한 형태의 YouTube URL에서 pure list ID를 추출하여 중복 등록 방지 및 표준화
   private String cleanPlaylistUrl(String rawUrl) {
     if (rawUrl == null || rawUrl.isBlank()) {
       return "";

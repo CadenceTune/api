@@ -38,6 +38,7 @@ public class ProcessorClient {
         return tracks != null ? tracks : Collections.emptyList();
       }
     } catch (Exception e) {
+      // 외부 프로세서 연동 실패가 전체 서비스 중단으로 이어지지 않도록 로그 기록 후 빈 리스트 반환
       log.error("[ProcessorClient] 파이썬 프로세서 통신 에러: {}", e.getMessage(), e);
     }
 
@@ -67,6 +68,7 @@ public class ProcessorClient {
         }
       }
     } catch (Exception e) {
+      // BPM 측정 실패 시 기본값(0.0)을 반환하여 서비스 예외 전파 방지
       log.error("[ProcessorClient BPM] 통신 에러: {}", e.getMessage(), e);
     }
     return 0.0;
