@@ -38,6 +38,11 @@ public class PlaylistService {
         .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
   }
 
+  /**
+   * URL을 정규화하여 중복 등록을 방지하고, 신규 플레이리스트에 프로세서가 수집한 트랙을 연결한다.
+   *
+   * <p>프로세서의 snake_case 및 camelCase 필드를 유연하게 지원하며, 누락된 메타데이터는 기본값으로 대체한다.
+   */
   @Transactional
   public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
     String playlistUrl = cleanPlaylistUrl(rawPlaylistUrl);
@@ -61,7 +66,6 @@ public class PlaylistService {
 
     if (rawTracks != null && !rawTracks.isEmpty()) {
       for (Map<String, Object> rawTrack : rawTracks) {
-        // 파이썬 프로세서 응답 포맷(snake_case / camelCase) 유연한 대응 및 기본값 보장
         String youtubeId =
             rawTrack.get("youtube_id") != null
                 ? (String) rawTrack.get("youtube_id")
@@ -114,6 +118,11 @@ public class PlaylistService {
     return new PlaylistResponseDto(savedPlaylist);
   }
 
+  /**
+   * 외부 분석 비용을 줄이고 기존 BPM을 보존하기 위해 플레이리스트 내 미측정(0.0) 트랙만 분석한다.
+   *
+   * <p>트랙별 분석 실패 시 에러 로그를 남기고 다음 트랙 처리 흐름을 계속 유지한다.
+   */
   @Transactional
   public void analyzePlaylistBpm(Long playlistId) {
     Playlist playlist =
@@ -122,7 +131,6 @@ public class PlaylistService {
             .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
 
     for (Track track : playlist.getTracks()) {
-      // 외부 통신 비용 절감 및 기존 BPM 보존을 위해 미측정(0.0) 트랙만 리소스를 소모하여 계산
       if (isTrackBpmEmpty(track)) {
         try {
           log.info(
@@ -178,7 +186,7 @@ public class PlaylistService {
     return track.getBpm() == 0.0;
   }
 
-  // 사용자가 공유한 다양한 형태의 YouTube URL에서 pure list ID를 추출하여 중복 등록 방지 및 표준화
+  /** 다양한 형태의 YouTube 공유 URL에서 pure list ID를 추출하여 중복 등록 방지 및 표준화한다. */
   private String cleanPlaylistUrl(String rawUrl) {
     if (rawUrl == null || rawUrl.isBlank()) {
       return "";

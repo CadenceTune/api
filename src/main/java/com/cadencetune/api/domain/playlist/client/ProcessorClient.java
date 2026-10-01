@@ -18,6 +18,7 @@ public class ProcessorClient {
 
   private final RestClient processorRestClient;
 
+  /** 외부 프로세서에서 트랙 목록을 가져오며, 연동 실패가 서비스 예외로 전파되지 않도록 빈 목록으로 대체한다. */
   @SuppressWarnings("unchecked")
   public List<Map<String, Object>> fetchPlaylistFromProcessor(String playlistUrl) {
     Map<String, String> requestBody = new HashMap<>();
@@ -38,13 +39,13 @@ public class ProcessorClient {
         return tracks != null ? tracks : Collections.emptyList();
       }
     } catch (Exception e) {
-      // 외부 프로세서 연동 실패가 전체 서비스 중단으로 이어지지 않도록 로그 기록 후 빈 리스트 반환
       log.error("[ProcessorClient] 파이썬 프로세서 통신 에러: {}", e.getMessage(), e);
     }
 
     return Collections.emptyList();
   }
 
+  /** 외부 프로세서에 BPM 분석을 요청하며, 분석 결과를 얻지 못하면 미측정 상태를 나타내는 0.0을 반환한다. */
   public double fetchBpmFromProcessor(String title, String artist, String youtubeUrl) {
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("title", title);
@@ -68,7 +69,6 @@ public class ProcessorClient {
         }
       }
     } catch (Exception e) {
-      // BPM 측정 실패 시 기본값(0.0)을 반환하여 서비스 예외 전파 방지
       log.error("[ProcessorClient BPM] 통신 에러: {}", e.getMessage(), e);
     }
     return 0.0;
