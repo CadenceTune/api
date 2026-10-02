@@ -4,18 +4,16 @@ import com.cadencetune.api.domain.playlist.dto.request.PlaylistRegisterRequest;
 import com.cadencetune.api.domain.playlist.dto.response.PlaylistResponseDto;
 import com.cadencetune.api.domain.playlist.service.PlaylistService;
 import com.cadencetune.api.global.common.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/playlists")
+@RequiredArgsConstructor
 public class PlaylistController {
 
   private final PlaylistService playlistService;
-
-  public PlaylistController(PlaylistService playlistService) {
-    this.playlistService = playlistService;
-  }
 
   @PostMapping
   public ResponseEntity<ApiResponse<PlaylistResponseDto>> registerPlaylist(
