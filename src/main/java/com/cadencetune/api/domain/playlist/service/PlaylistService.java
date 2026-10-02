@@ -11,26 +11,19 @@ import com.cadencetune.api.global.error.ErrorCode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PlaylistService {
 
   private final ProcessorClient processorClient;
   private final PlaylistRepository playlistRepository;
   private final TrackRepository trackRepository;
-
-  public PlaylistService(
-      ProcessorClient processorClient,
-      PlaylistRepository playlistRepository,
-      TrackRepository trackRepository) {
-    this.processorClient = processorClient;
-    this.playlistRepository = playlistRepository;
-    this.trackRepository = trackRepository;
-  }
 
   public Playlist findById(Long id) {
     return playlistRepository
