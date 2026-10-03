@@ -35,6 +35,7 @@ public class PlaylistService {
    * URL을 정규화하여 중복 등록을 방지하고, 신규 플레이리스트에 프로세서가 수집한 트랙을 연결한다.
    *
    * <p>프로세서의 snake_case 및 camelCase 필드를 유연하게 지원하며, 누락된 메타데이터는 기본값으로 대체한다.
+   * 프로세서 통신 오류(5xx, 타임아웃) 발생 시 ProcessorClient에서 PROCESSOR_ERROR 예외가 전파된다.
    */
   @Transactional
   public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
@@ -50,14 +51,15 @@ public class PlaylistService {
       return new PlaylistResponseDto(existingPlaylist);
     }
 
+    // ProcessorClient에서 통신 오류 시 BusinessException(PROCESSOR_ERROR)이 전파된다.
     List<Map<String, Object>> rawTracks = processorClient.fetchPlaylistFromProcessor(playlistUrl);
 
-    log.info("[PlaylistService] 수집된 트랙 개수: {}", rawTracks != null ? rawTracks.size() : 0);
+    log.info("[PlaylistService] 수집된 트랙 개수: {}", rawTracks.size());
 
     Playlist playlist = Playlist.from(playlistUrl);
     Playlist savedPlaylist = playlistRepository.save(playlist);
 
-    if (rawTracks != null && !rawTracks.isEmpty()) {
+    if (!rawTracks.isEmpty()) {
       for (Map<String, Object> rawTrack : rawTracks) {
         String youtubeId =
             rawTrack.get("youtube_id") != null
@@ -115,6 +117,7 @@ public class PlaylistService {
    * 외부 분석 비용을 줄이고 기존 BPM을 보존하기 위해 플레이리스트 내 미측정(0.0) 트랙만 분석한다.
    *
    * <p>트랙별 분석 실패 시 에러 로그를 남기고 다음 트랙 처리 흐름을 계속 유지한다.
+   * 단, 통신 자체 오류(5xx, 타임아웃)는 PROCESSOR_ERROR로 전파된다.
    */
   @Transactional
   public void analyzePlaylistBpm(Long playlistId) {
@@ -125,24 +128,10 @@ public class PlaylistService {
 
     for (Track track : playlist.getTracks()) {
       if (isTrackBpmEmpty(track)) {
-        try {
-          log.info(
-              "[BPM 분석 시작] 트랙 ID {} | {} - {}", track.getId(), track.getArtist(), track.getTitle());
-          double bpm =
-              processorClient.fetchBpmFromProcessor(
-                  track.getTitle(), track.getArtist(), track.getUrl());
-          if (bpm > 0.0) {
-            track.updateBpm(bpm);
-            trackRepository.save(track);
-            log.info("[BPM 저장 성공] 트랙 ID {} -> {} BPM", track.getId(), bpm);
-          } else {
-            log.warn("[BPM 저장 스킵] BPM을 찾을 수 없음 (0.0 반환) - 트랙 ID {}", track.getId());
-          }
-        } catch (Exception e) {
-          log.error("트랙 ID {} BPM 분석 실패: {}", track.getId(), e.getMessage(), e);
-        }
+        analyzeSingleTrackBpm(track);
       } else {
-        log.info("[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
+        log.info(
+            "[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
       }
     }
   }
@@ -153,25 +142,31 @@ public class PlaylistService {
 
     for (Track track : tracks) {
       if (isTrackBpmEmpty(track)) {
-        try {
-          log.info(
-              "[BPM 분석 시작] 트랙 ID {} | {} - {}", track.getId(), track.getArtist(), track.getTitle());
-          double bpm =
-              processorClient.fetchBpmFromProcessor(
-                  track.getTitle(), track.getArtist(), track.getUrl());
-          if (bpm > 0.0) {
-            track.updateBpm(bpm);
-            trackRepository.save(track);
-            log.info("[BPM 저장 성공] 트랙 ID {} -> {} BPM", track.getId(), bpm);
-          } else {
-            log.warn("[BPM 저장 스킵] BPM을 찾을 수 없음 (0.0 반환) - 트랙 ID {}", track.getId());
-          }
-        } catch (Exception e) {
-          log.error("트랙 ID {} BPM 분석 실패: {}", track.getId(), e.getMessage(), e);
-        }
+        analyzeSingleTrackBpm(track);
       } else {
-        log.info("[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
+        log.info(
+            "[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
       }
+    }
+  }
+
+  /** 트랙별 BPM 분석은 개별 실패를 허용하여 나머지 트랙 처리를 이어간다. */
+  private void analyzeSingleTrackBpm(Track track) {
+    try {
+      log.info(
+          "[BPM 분석 시작] 트랙 ID {} | {} - {}", track.getId(), track.getArtist(), track.getTitle());
+      double bpm =
+          processorClient.fetchBpmFromProcessor(
+              track.getTitle(), track.getArtist(), track.getUrl());
+      if (bpm > 0.0) {
+        track.updateBpm(bpm);
+        trackRepository.save(track);
+        log.info("[BPM 저장 성공] 트랙 ID {} -> {} BPM", track.getId(), bpm);
+      } else {
+        log.warn("[BPM 저장 스킵] BPM을 찾을 수 없음 (0.0 반환) - 트랙 ID {}", track.getId());
+      }
+    } catch (Exception e) {
+      log.error("트랙 ID {} BPM 분석 실패: {}", track.getId(), e.getMessage(), e);
     }
   }
 
