@@ -13,6 +13,9 @@ java {
     }
 }
 
+// Jackson 2 전이 의존성 보안 취약점 패치 (spring-boot-dependencies 기본 2.21.5 오버라이드)
+ext['jackson-2-bom.version'] = '2.22.3'
+
 repositories {
     mavenCentral()
 }
@@ -30,6 +33,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+
+    // MockWebServer: 타임아웃 등 실제 네트워크 레벨 시나리오 테스트
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
