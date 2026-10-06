@@ -2,8 +2,8 @@ package com.cadencetune.api.domain.playlist.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.cadencetune.api.domain.playlist.entity.Playlist;
 import com.cadencetune.api.domain.playlist.entity.Track;
+import com.cadencetune.api.domain.playlist.entity.YoutubePlaylist;
 import com.cadencetune.api.support.annotation.RepositoryTest;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
 @RepositoryTest
-class PlaylistRepositoryTest {
+class YoutubePlaylistRepositoryTest {
 
-  @Autowired private PlaylistRepository playlistRepository;
+  @Autowired private YoutubePlaylistRepository youtubePlaylistRepository;
 
   @Autowired private TestEntityManager em;
 
@@ -27,26 +27,29 @@ class PlaylistRepositoryTest {
     @DisplayName("플레이리스트 등록 시 ID가 정상 채번되고 조회된다")
     void saveAndFindPlaylist() {
       // given
-      Playlist playlist = Playlist.from("https://www.youtube.com/playlist?list=sample");
+      YoutubePlaylist playlist =
+          YoutubePlaylist.from("https://www.youtube.com/playlist?list=sample");
 
       // when
-      Playlist savedPlaylist = playlistRepository.save(playlist);
+      YoutubePlaylist savedPlaylist = youtubePlaylistRepository.save(playlist);
 
       em.flush();
       em.clear();
 
       // then
-      Optional<Playlist> foundPlaylist = playlistRepository.findById(savedPlaylist.getId());
+      Optional<YoutubePlaylist> foundPlaylist =
+          youtubePlaylistRepository.findById(savedPlaylist.getId());
       assertThat(foundPlaylist).isPresent();
       assertThat(foundPlaylist.get().getUrl())
           .isEqualTo("https://www.youtube.com/playlist?list=sample");
     }
 
     @Test
-    @DisplayName("Playlist에 Track을 추가하면 Cascade.ALL에 의해 Track도 함께 영속화된다")
+    @DisplayName("YoutubePlaylist에 Track을 추가하면 Cascade.ALL에 의해 매핑 엔티티가 함께 영속화된다")
     void savePlaylistWithTracks_CascadeSuccess() {
       // given
-      Playlist playlist = Playlist.from("https://www.youtube.com/playlist?list=sample");
+      YoutubePlaylist playlist =
+          YoutubePlaylist.from("https://www.youtube.com/playlist?list=sample");
 
       Track track1 =
           Track.builder()
@@ -70,20 +73,26 @@ class PlaylistRepositoryTest {
               .bpm(130.0)
               .build();
 
+      em.persist(track1);
+      em.persist(track2);
+
       playlist.addTrack(track1);
       playlist.addTrack(track2);
 
       // when
-      Playlist savedPlaylist = playlistRepository.save(playlist);
+      YoutubePlaylist savedPlaylist = youtubePlaylistRepository.save(playlist);
 
       em.flush();
       em.clear();
 
       // then
-      Playlist foundPlaylist = playlistRepository.findById(savedPlaylist.getId()).orElseThrow();
+      YoutubePlaylist foundPlaylist =
+          youtubePlaylistRepository.findById(savedPlaylist.getId()).orElseThrow();
 
       assertThat(foundPlaylist.getTracks()).hasSize(2);
-      assertThat(foundPlaylist.getTracks()).extracting("title").containsExactly("곡 제목 1", "곡 제목 2");
+      assertThat(foundPlaylist.getTracks())
+          .extracting("track.title")
+          .containsExactly("곡 제목 1", "곡 제목 2");
     }
   }
 }

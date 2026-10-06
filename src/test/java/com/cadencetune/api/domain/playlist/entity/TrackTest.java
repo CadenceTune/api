@@ -51,24 +51,4 @@ class TrackTest {
     // then
     assertThat(track.getBpm()).isEqualTo(128.5);
   }
-
-  @Test
-  @DisplayName("Playlist 할당 메서드로 Playlist 연관관계를 설정한다")
-  void assignPlaylist_Success() {
-    // given
-    Track track =
-        Track.builder()
-            .youtubeId("video123")
-            .title("Test Song")
-            .url("https://youtube.com/watch?v=video123")
-            .build();
-    Playlist playlist = Playlist.from("https://youtube.com/playlist?list=sample");
-
-    // when
-    track.assignPlaylist(playlist);
-
-    // then
-    assertThat(track.getPlaylist()).isNotNull();
-    assertThat(track.getPlaylist()).isEqualTo(playlist);
-  }
 }

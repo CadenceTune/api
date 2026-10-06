@@ -35,10 +35,6 @@ public class Track extends BaseEntity {
 
   private double bpm;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "playlist_id")
-  private Playlist playlist;
-
   @Builder
   public Track(
       String youtubeId,
@@ -59,9 +55,5 @@ public class Track extends BaseEntity {
 
   public void updateBpm(double bpm) {
     this.bpm = bpm;
-  }
-
-  public void assignPlaylist(Playlist playlist) {
-    this.playlist = playlist;
   }
 }
