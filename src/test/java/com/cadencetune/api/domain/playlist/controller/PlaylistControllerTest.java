@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.cadencetune.api.domain.playlist.dto.request.PlaylistRegisterRequest;
 import com.cadencetune.api.domain.playlist.dto.response.PlaylistResponseDto;
-import com.cadencetune.api.domain.playlist.service.PlaylistService;
+import com.cadencetune.api.domain.playlist.service.YoutubePlaylistService;
 import com.cadencetune.api.global.error.BusinessException;
 import com.cadencetune.api.global.error.ErrorCode;
 import com.cadencetune.api.global.error.GlobalExceptionHandler;
@@ -33,7 +33,7 @@ class PlaylistControllerTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  @MockitoBean private PlaylistService playlistService;
+  @MockitoBean private YoutubePlaylistService youtubePlaylistService;
 
   @Test
   @DisplayName("플레이리스트 등록 성공 시 ApiResponse SUCCESS 규격으로 응답한다")
@@ -42,7 +42,7 @@ class PlaylistControllerTest {
     PlaylistResponseDto responseDto =
         new PlaylistResponseDto(
             1L, "https://www.youtube.com/playlist?list=sample", Collections.emptyList());
-    given(playlistService.registerPlaylist(anyString())).willReturn(responseDto);
+    given(youtubePlaylistService.registerPlaylist(anyString())).willReturn(responseDto);
 
     PlaylistRegisterRequest request =
         new PlaylistRegisterRequest("https://www.youtube.com/playlist?list=sample");
@@ -65,7 +65,7 @@ class PlaylistControllerTest {
   void analyzePlaylist_NotFound() throws Exception {
     // given
     willThrow(new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND))
-        .given(playlistService)
+        .given(youtubePlaylistService)
         .analyzePlaylistBpm(anyLong());
 
     // when & then

@@ -2,10 +2,11 @@ package com.cadencetune.api.domain.playlist.service;
 
 import com.cadencetune.api.domain.playlist.client.ProcessorClient;
 import com.cadencetune.api.domain.playlist.dto.response.PlaylistResponseDto;
-import com.cadencetune.api.domain.playlist.entity.Playlist;
 import com.cadencetune.api.domain.playlist.entity.Track;
-import com.cadencetune.api.domain.playlist.repository.PlaylistRepository;
+import com.cadencetune.api.domain.playlist.entity.YoutubePlaylist;
+import com.cadencetune.api.domain.playlist.entity.YoutubePlaylistTrack;
 import com.cadencetune.api.domain.playlist.repository.TrackRepository;
+import com.cadencetune.api.domain.playlist.repository.YoutubePlaylistRepository;
 import com.cadencetune.api.global.error.BusinessException;
 import com.cadencetune.api.global.error.ErrorCode;
 import java.util.List;
@@ -19,33 +20,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PlaylistService {
+public class YoutubePlaylistService {
 
   private final ProcessorClient processorClient;
-  private final PlaylistRepository playlistRepository;
+  private final YoutubePlaylistRepository youtubePlaylistRepository;
   private final TrackRepository trackRepository;
-
-  public Playlist findById(Long id) {
-    return playlistRepository
-        .findById(id)
-        .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
-  }
 
   /**
    * URL을 정규화하여 중복 등록을 방지하고, 신규 플레이리스트에 프로세서가 수집한 트랙을 연결한다.
    *
-   * <p>프로세서의 snake_case 및 camelCase 필드를 유연하게 지원하며, 누락된 메타데이터는 기본값으로 대체한다.
-   * 프로세서 통신 오류(5xx, 타임아웃) 발생 시 ProcessorClient에서 PROCESSOR_ERROR 예외가 전파된다.
+   * <p>프로세서의 snake_case 및 camelCase 필드를 유연하게 지원하며, 누락된 메타데이터는 기본값으로 대체한다. 프로세서 통신 오류(5xx, 타임아웃) 발생
+   * 시 ProcessorClient에서 PROCESSOR_ERROR 예외가 전파된다.
    */
   @Transactional
   public PlaylistResponseDto registerPlaylist(String rawPlaylistUrl) {
     String playlistUrl = cleanPlaylistUrl(rawPlaylistUrl);
 
-    Optional<Playlist> existingPlaylistOpt = playlistRepository.findByUrl(playlistUrl);
+    Optional<YoutubePlaylist> existingPlaylistOpt =
+        youtubePlaylistRepository.findByUrl(playlistUrl);
     if (existingPlaylistOpt.isPresent()) {
-      Playlist existingPlaylist = existingPlaylistOpt.get();
+      YoutubePlaylist existingPlaylist = existingPlaylistOpt.get();
       log.info(
-          "[Playlist 중복] 이미 등록된 플레이리스트입니다 - ID: {} | URL: {}",
+          "[YoutubePlaylist 중복] 이미 등록된 플레이리스트입니다 - ID: {} | URL: {}",
           existingPlaylist.getId(),
           playlistUrl);
       return new PlaylistResponseDto(existingPlaylist);
@@ -54,10 +50,10 @@ public class PlaylistService {
     // ProcessorClient에서 통신 오류 시 BusinessException(PROCESSOR_ERROR)이 전파된다.
     List<Map<String, Object>> rawTracks = processorClient.fetchPlaylistFromProcessor(playlistUrl);
 
-    log.info("[PlaylistService] 수집된 트랙 개수: {}", rawTracks.size());
+    log.info("[YoutubePlaylistService] 수집된 트랙 개수: {}", rawTracks.size());
 
-    Playlist playlist = Playlist.from(playlistUrl);
-    Playlist savedPlaylist = playlistRepository.save(playlist);
+    YoutubePlaylist playlist = YoutubePlaylist.from(playlistUrl);
+    YoutubePlaylist savedPlaylist = youtubePlaylistRepository.save(playlist);
 
     if (!rawTracks.isEmpty()) {
       for (Map<String, Object> rawTrack : rawTracks) {
@@ -99,15 +95,16 @@ public class PlaylistService {
                   .thumbnailUrl(thumbnailUrl)
                   .bpm(0.0)
                   .build();
+          // 같은 곡이 재생목록에 반복될 때 findByYoutubeId로 재사용되도록 즉시 저장한다.
+          trackRepository.save(track);
           log.info("[Track 신규] 새로운 트랙 추가 - {} - {}", artist, title);
         }
 
-        track.assignPlaylist(savedPlaylist);
         savedPlaylist.addTrack(track);
       }
 
-      trackRepository.saveAll(savedPlaylist.getTracks());
-      log.info("[PlaylistService] 플레이리스트 트랙 저장 완료 (총 {}개)", savedPlaylist.getTracks().size());
+      log.info(
+          "[YoutubePlaylistService] 플레이리스트 트랙 저장 완료 (총 {}개)", savedPlaylist.getTracks().size());
     }
 
     return new PlaylistResponseDto(savedPlaylist);
@@ -116,22 +113,21 @@ public class PlaylistService {
   /**
    * 외부 분석 비용을 줄이고 기존 BPM을 보존하기 위해 플레이리스트 내 미측정(0.0) 트랙만 분석한다.
    *
-   * <p>트랙별 분석 실패 시 에러 로그를 남기고 다음 트랙 처리 흐름을 계속 유지한다.
-   * 단, 통신 자체 오류(5xx, 타임아웃)는 PROCESSOR_ERROR로 전파된다.
+   * <p>트랙별 분석 실패 시 에러 로그를 남기고 다음 트랙 처리 흐름을 계속 유지한다. 단, 통신 자체 오류(5xx, 타임아웃)는 PROCESSOR_ERROR로 전파된다.
    */
   @Transactional
   public void analyzePlaylistBpm(Long playlistId) {
-    Playlist playlist =
-        playlistRepository
+    YoutubePlaylist playlist =
+        youtubePlaylistRepository
             .findById(playlistId)
             .orElseThrow(() -> new BusinessException(ErrorCode.PLAYLIST_NOT_FOUND));
 
-    for (Track track : playlist.getTracks()) {
+    for (YoutubePlaylistTrack playlistTrack : playlist.getTracks()) {
+      Track track = playlistTrack.getTrack();
       if (isTrackBpmEmpty(track)) {
         analyzeSingleTrackBpm(track);
       } else {
-        log.info(
-            "[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
+        log.info("[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
       }
     }
   }
@@ -144,8 +140,7 @@ public class PlaylistService {
       if (isTrackBpmEmpty(track)) {
         analyzeSingleTrackBpm(track);
       } else {
-        log.info(
-            "[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
+        log.info("[BPM 분석 스킵] 이미 BPM이 존재하는 트랙 - ID {} (BPM: {})", track.getId(), track.getBpm());
       }
     }
   }

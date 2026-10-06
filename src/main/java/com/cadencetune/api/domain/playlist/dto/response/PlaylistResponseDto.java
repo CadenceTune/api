@@ -1,6 +1,6 @@
 package com.cadencetune.api.domain.playlist.dto.response;
 
-import com.cadencetune.api.domain.playlist.entity.Playlist;
+import com.cadencetune.api.domain.playlist.entity.YoutubePlaylist;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -18,10 +18,12 @@ public class PlaylistResponseDto {
     this.tracks = tracks;
   }
 
-  public PlaylistResponseDto(Playlist playlist) {
+  public PlaylistResponseDto(YoutubePlaylist playlist) {
     this.id = playlist.getId();
     this.url = playlist.getUrl();
     this.tracks =
-        playlist.getTracks().stream().map(TrackResponseDto::new).collect(Collectors.toList());
+        playlist.getTracks().stream()
+            .map(t -> new TrackResponseDto(t.getTrack()))
+            .collect(Collectors.toList());
   }
 }
