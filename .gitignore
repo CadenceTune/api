@@ -37,5 +37,3 @@ out/
 .vscode/
 
 **/application-local.yml
-
-.github/issues/
